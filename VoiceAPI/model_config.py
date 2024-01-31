@@ -16,7 +16,16 @@ from GPT_SoVITS.module.models import SynthesizerTrn
 from GPT_SoVITS.AR.models.t2s_lightning_module import Text2SemanticLightningModule
 from VoiceAPI.util.model_util import luotuo_openai_embedding
 from VoiceAPI.ChromaDB import ChromaDB
+import ffmpeg
 
+def check_audio_length(filename):
+    probe = ffmpeg.probe(filename)
+    duration = float(probe['format']['duration'])
+
+    if 3 <= duration <= 10:
+        return True
+    else:
+        return False
 
 class DictToAttrRecursive:
     def __init__(self, input_dict):
@@ -142,10 +151,13 @@ for k, v in model_path_config.items():
             for line in slicer_data:
                 text = line.split("|")[-1]
                 wav_path = line.split("|")[0]
-                language = line.split("|")[-2]
-                embedding = luotuo_openai_embedding(text)
-                wav_data_list.append(wav_path + "|" + text + "|" + language)
-                embedding_list.append(embedding)
+                if check_audio_length(wav_path):
+                    language = line.split("|")[-2]
+                    embedding = luotuo_openai_embedding(text)
+                    wav_data_list.append(wav_path + "|" + text + "|" + language)
+                    embedding_list.append(embedding)
+                else:
+                    continue
         db.init_from_docs(embedding_list, wav_data_list)
         db.save(db_folder)
 
