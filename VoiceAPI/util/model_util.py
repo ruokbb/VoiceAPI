@@ -24,6 +24,7 @@ import os
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 _luotuo_model = None
+_luotuo_tokenizer = None
 
 _luotuo_model_en = None
 _luotuo_en_tokenizer = None
@@ -96,12 +97,21 @@ def download_luotuo_models():
         print("Luotuo-Bert加载完毕")
         return model
 
+def download_luotuo_tokenizer():
+    tokenizer = AutoTokenizer.from_pretrained("silk-road/luotuo-bert-medium")
+    return tokenizer
 
 def get_luotuo_model():
     global _luotuo_model
     if _luotuo_model is None:
         _luotuo_model = download_luotuo_models()
     return _luotuo_model
+
+def get_luotuo_tikenizer():
+    global _luotuo_tokenizer
+    if _luotuo_tokenizer is None:
+        _luotuo_tokenizer = download_luotuo_tokenizer()
+    return _luotuo_tokenizer
 
 
 def luotuo_embedding(model, texts):
@@ -112,7 +122,7 @@ def luotuo_embedding(model, texts):
     :return:
     """
     # Tokenize the texts_source
-    tokenizer = AutoTokenizer.from_pretrained("silk-road/luotuo-bert-medium")
+    tokenizer = get_luotuo_tikenizer()
     inputs = tokenizer(texts, padding=True, truncation=False, return_tensors="pt")
     inputs = inputs.to(device)
     # Extract the embeddings
@@ -198,3 +208,6 @@ def luotuo_openai_embedding(texts, is_chinese=None):
 #         _enc_model = tiktoken.get_encoding("cl100k_base")
 #
 #     return len(_enc_model.encode(text))
+
+if __name__ == "__main__":
+    tokenizer = AutoTokenizer.from_pretrained("silk-road/luotuo-bert-medium")

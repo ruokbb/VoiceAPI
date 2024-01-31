@@ -95,7 +95,7 @@ model_path_config = {
 
 # 填充model_data
 model_data = {}
-for k, v in model_path_config:
+for k, v in model_path_config.items():
     sovits_path = v["sovits"]
     dict_s2 = torch.load(sovits_path, map_location="cpu")
     hps = dict_s2["config"]

@@ -57,7 +57,7 @@ def handle(refer_wav_path, prompt_text, prompt_language, text, text_language, mo
             # 从db中找
             db = model_data[model_name]["db"]
             eb = luotuo_openai_embedding(text)
-            refer_data = db.search(eb, 1)
+            refer_data = db.search(eb, 1)[0]
             refer_wav_path = refer_data.split("|")[0]
             prompt_text = refer_data.split("|")[1]
             prompt_language = refer_data.split("|")[2]
