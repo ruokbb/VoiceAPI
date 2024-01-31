@@ -11,11 +11,11 @@
 from time import time as ttime
 import numpy as np
 import torch
-from model.model_loading import model_data, is_half, device,ssl_model, dict_language, tokenizer, bert_model, hz
+from VoiceAPI.model_config import model_data, is_half, device,ssl_model, dict_language, tokenizer, bert_model, hz
 import librosa
-from text import cleaned_text_to_sequence
-from text.cleaner import clean_text
-from module.mel_processing import spectrogram_torch
+from GPT_SoVITS.text import cleaned_text_to_sequence
+from GPT_SoVITS.text.cleaner import clean_text
+from GPT_SoVITS.module.mel_processing import spectrogram_torch
 from tools.my_utils import load_audio
 
 

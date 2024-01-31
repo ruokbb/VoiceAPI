@@ -7,17 +7,21 @@
 @Software: PyCharm
 @desc: 
 """
+
+
 from fastapi import File, UploadFile, Form, Header
 import json
 import os
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 import uvicorn
 from starlette.responses import Response
 from fastapi.responses import StreamingResponse, JSONResponse
-from GPT_SoVITS.product import get_tts_wav
+from VoiceAPI.product import get_tts_wav
 import torch
 import soundfile as sf
 from io import BytesIO
+from VoiceAPI.model_config import model_data
+from VoiceAPI.util.model_util import luotuo_openai_embedding
 
 API_DIR = "api"
 USER_DATA_PATH = os.path.join(API_DIR, "user_data.json")
@@ -47,7 +51,16 @@ def handle(refer_wav_path, prompt_text, prompt_language, text, text_language, mo
             or prompt_text == "" or prompt_text is None
             or prompt_language == "" or prompt_language is None
     ):
-        return JSONResponse({"code": 400, "message": "未指定参考音频"}, status_code=400)
+        if model_name == "default":
+            return JSONResponse({"code": 400, "message": "未指定参考音频"}, status_code=400)
+        else:
+            # 从db中找
+            db = model_data[model_name]["db"]
+            eb = luotuo_openai_embedding(text)
+            refer_data = db.search(eb, 1)
+            refer_wav_path = refer_data.split("|")[0]
+            prompt_text = refer_data.split("|")[1]
+            prompt_language = refer_data.split("|")[2]
 
     with torch.no_grad():
         gen = get_tts_wav(
@@ -99,20 +112,23 @@ app.add_middleware(VerifyTokenMiddleware)
 async def tts_endpoint(
         refer_name: str = None,
         text: str = None,
-        text_language: str = None,
+        text_language: str = "zh",
         model_name: str = "default",
         token: str = Header("default")
 ):
     data_path = os.path.join(USER_SOURCE_DIR_PATH, token, "data.json")
     with open(data_path, "r", encoding="UTF-8") as f:
         data = json.load(f)
-        if refer_name not in data:
+        if refer_name not in data and model_name == "default":
             return JSONResponse({"code": 400, "message": "参考音频不存在，请重新上传"})
         else:
-            refer_wav_path = os.path.join(USER_SOURCE_DIR_PATH, token, data[refer_name][0])
-            prompt_text = data[refer_name][1]
-            prompt_language = data[refer_name][2]
-            return handle(refer_wav_path, prompt_text, prompt_language, text, text_language, model_name)
+            if refer_name:
+                refer_wav_path = os.path.join(USER_SOURCE_DIR_PATH, token, data[refer_name][0])
+                prompt_text = data[refer_name][1]
+                prompt_language = data[refer_name][2]
+                return handle(refer_wav_path, prompt_text, prompt_language, text, text_language, model_name)
+            else:
+                return handle(None, None, "zh", text, text_language, model_name)
 
 
 @app.post("/upload_refer")
