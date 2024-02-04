@@ -204,12 +204,13 @@ async def get_refer_list(
     with open(data_path, "r", encoding="UTF-8") as f:
         data = json.load(f)
     a = list(data.keys())
-    b = list(model_refer_config[model_name].keys())
-    c =  a + b
-    c = [i for i in c if i != "tmp"]
+    if model_name in model_refer_config:
+        b = list(model_refer_config[model_name].keys())
+        a = a + b
+    a = [i for i in a if i != "tmp"]
     if model_name in adaptive_models:
-        c.append('adaptive')
-    return JSONResponse({"code": 0, "message": "Success", "data": c})
+        a.append('adaptive')
+    return JSONResponse({"code": 0, "message": "Success", "data": a})
 
 
 if __name__ == "__main__":
