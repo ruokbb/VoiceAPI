@@ -129,7 +129,7 @@ async def tts_endpoint(
                 prompt_text = data[refer_name][1]
                 prompt_language = data[refer_name][2]
                 return handle(refer_wav_path, prompt_text, prompt_language, text, text_language, model_name)
-            elif refer_name in model_refer_config[model_name]:
+            elif model_name in model_refer_config and refer_name in model_refer_config[model_name]:
                 # 使用预设参考音频
                 refer_wav_path = model_refer_config[model_name][refer_name]["wav_path"]
                 prompt_text = model_refer_config[model_name][refer_name]["prompt_text"]
