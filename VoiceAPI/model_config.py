@@ -153,6 +153,13 @@ for k, v in model_data_config.items():
 
     # 加载bert
     if v["slicer"] == "":
+        model_data[k] = {
+            "hps": hps,
+            "vq_model": vq_model,
+            "max_sec": max_sec,
+            "t2s_model": t2s_model,
+            "top_k": config['inference']['top_k'],
+        }
         continue
 
     db = ChromaDB()
