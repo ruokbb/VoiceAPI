@@ -8,7 +8,6 @@
 @desc: 
 """
 
-
 from fastapi import File, UploadFile, Form, Header
 import json
 import os
@@ -20,7 +19,7 @@ from VoiceAPI.product import get_tts_wav
 import torch
 import soundfile as sf
 from io import BytesIO
-from VoiceAPI.model_config import model_data
+from VoiceAPI.model_config import model_data, model_refer_config, adaptive_models
 from VoiceAPI.util.model_util import luotuo_openai_embedding
 
 API_DIR = "api"
@@ -119,16 +118,30 @@ async def tts_endpoint(
     data_path = os.path.join(USER_SOURCE_DIR_PATH, token, "data.json")
     with open(data_path, "r", encoding="UTF-8") as f:
         data = json.load(f)
-        if refer_name not in data and model_name == "default":
-            return JSONResponse({"code": 400, "message": "参考音频不存在，请重新上传"})
-        else:
-            if refer_name:
+    if refer_name not in data and refer_name == "default":
+        # 使用地膜且没上传参考音频
+        return JSONResponse({"code": 400, "message": "参考音频不存在，请重新上传"})
+    else:
+        if refer_name:
+            if refer_name in data:
+                # 使用上传的参考音频
                 refer_wav_path = os.path.join(USER_SOURCE_DIR_PATH, token, data[refer_name][0])
                 prompt_text = data[refer_name][1]
                 prompt_language = data[refer_name][2]
                 return handle(refer_wav_path, prompt_text, prompt_language, text, text_language, model_name)
-            else:
+            elif refer_name in model_refer_config[model_name]:
+                # 使用预设参考音频
+                refer_wav_path = model_refer_config[model_name][refer_name]["wav_path"]
+                prompt_text = model_refer_config[model_name][refer_name]["prompt_text"]
+                prompt_language = model_refer_config[model_name][refer_name]["prompt_language"]
+                return handle(refer_wav_path, prompt_text, prompt_language, text, text_language, model_name)
+            elif refer_name == "adaptive" and model_name in adaptive_models:
+                # 自适应匹配
                 return handle(None, None, "zh", text, text_language, model_name)
+            else:
+                return JSONResponse({"code": 400, "message": "参考音频不存在，请检查"})
+        else:
+            return JSONResponse({"code": 400, "message": "参考音频不存在，请检查"})
 
 
 @app.post("/upload_refer")
@@ -174,6 +187,29 @@ async def control(request: Request):
     with open(USER_DATA_PATH, "w", encoding="UTF-8") as f:
         json.dump(data, f)
     return JSONResponse({"code": 0, "message": "Success"})
+
+
+@app.get("/get_model_names")
+async def get_model_names():
+    model_names = list(model_data.keys())
+    return JSONResponse({"code": 0, "message": "Success", "data": model_names})
+
+
+@app.get("/get_refer_list")
+async def get_refer_list(
+        model_name: str = "default",
+        token: str = Header("default")
+):
+    data_path = os.path.join(USER_SOURCE_DIR_PATH, token, "data.json")
+    with open(data_path, "r", encoding="UTF-8") as f:
+        data = json.load(f)
+    a = list(data.keys())
+    b = list(model_refer_config[model_name].keys())
+    c =  a + b
+    c = [i for i in c if i != "tmp"]
+    if model_name in adaptive_models:
+        c.append('adaptive')
+    return JSONResponse({"code": 0, "message": "Success", "data": c})
 
 
 if __name__ == "__main__":

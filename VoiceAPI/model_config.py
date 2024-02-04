@@ -89,7 +89,7 @@ else:
 hz = 50
 
 # 不同模型配置
-model_path_config = {
+model_data_config = {
     "default": {
         "gpt": "GPT_SoVITS/pretrained_models/s1bert25hz-2kh-longer-epoch=68e-step=50232.ckpt",
         "sovits": "GPT_SoVITS/pretrained_models/s2G488k.pth",
@@ -102,9 +102,25 @@ model_path_config = {
     },
 }
 
+adaptive_models = ["suiji"]
+model_refer_config = {
+    "jok":{
+        "yujie":{
+            "wav_path": "/home/sqx/project/GPT-SoVITS/api/refer/jok/yujie.wav",
+            "prompt_text": "像这样一边舔龟头，然后呃辅助按摩搞完的话也没有也没有感觉吗？",
+            "prompt_language": "zh",
+        },
+        "eryu":{
+            "wav_path": "/home/sqx/project/GPT-SoVITS/api/refer/jok/eryu.wav",
+            "prompt_text": "用龟头用龟头摩擦我的奶。",
+            "prompt_language": "zh",
+        },
+    }
+}
+
 # 填充model_data
 model_data = {}
-for k, v in model_path_config.items():
+for k, v in model_data_config.items():
     sovits_path = v["sovits"]
     dict_s2 = torch.load(sovits_path, map_location="cpu")
     hps = dict_s2["config"]
