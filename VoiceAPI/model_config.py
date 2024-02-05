@@ -105,6 +105,11 @@ model_data_config = {
         "sovits": "VoiceAPI/model/jok/jok_e25_s1075.pth",
         "slicer": "",
     },
+    "paimon": {
+        "gpt": "VoiceAPI/model/paimon/paimon-e10.ckpt",
+        "sovits": "VoiceAPI/model/paimon/paimon_e110_s159940.pth",
+        "slicer": "",
+    },
 }
 
 adaptive_models = ["suiji"] # model_data_config 中需要配置slicer
@@ -120,7 +125,29 @@ model_refer_config = {
             "prompt_text": "用龟头用龟头摩擦我的奶。",
             "prompt_language": "zh",
         },
-    }
+    },
+    "paimon": {
+        "angry": {
+            "wav_path": "/home/sqx/project/GPT-SoVITS/api/refer/paimon/angry.wav",
+            "prompt_text": "呜哇好生气啊！不要把我跟一斗相提并论！",
+            "prompt_language": "zh",
+        },
+        "confuse": {
+            "wav_path": "/home/sqx/project/GPT-SoVITS/api/refer/paimon/confuse.wav",
+            "prompt_text": "哇，这个，还有这个…只是和史莱姆打了一场，就有这么多结论吗？",
+            "prompt_language": "zh",
+        },
+        "excited": {
+            "wav_path": "/home/sqx/project/GPT-SoVITS/api/refer/paimon/excited.wav",
+            "prompt_text": "好耶！《特尔克西的奇幻历险》出发咯！",
+            "prompt_language": "zh",
+        },
+        "normal": {
+            "wav_path": "/home/sqx/project/GPT-SoVITS/api/refer/paimon/normal.wav",
+            "prompt_text": "既然罗莎莉亚说足迹上有元素力，用元素视野应该能很清楚地看到吧。",
+            "prompt_language": "zh",
+        },
+    },
 }
 
 # 填充model_data
