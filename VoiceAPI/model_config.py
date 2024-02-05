@@ -100,9 +100,14 @@ model_data_config = {
         "sovits": "VoiceAPI/model/suiji/suiji_e25_s1525.pth",
         "slicer": "/home/sqx/vocal/suiji/suiji.list",
     },
+    "jok": {
+        "gpt": "VoiceAPI/model/jok/jok-e5.ckpt",
+        "sovits": "VoiceAPI/model/jok/jok_e25_s1075.pth",
+        "slicer": "",
+    },
 }
 
-adaptive_models = ["suiji"]
+adaptive_models = ["suiji"] # model_data_config 中需要配置slicer
 model_refer_config = {
     "jok":{
         "yujie":{
